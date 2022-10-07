@@ -9,6 +9,7 @@ import net.milkbowl.vault.permission.Permission;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
@@ -26,7 +27,7 @@ public class PFDListener implements Listener {
         permission = PayForDeath.INSTANCE.getPermissions();
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerDeath(PlayerDeathEvent event) {
 
         Player player = event.getEntity();
@@ -36,6 +37,10 @@ public class PFDListener implements Listener {
         ConfigurationSection config = pfdBean.getConfig();
         String worldName = pfdBean.getDeathWorldName();
         double balance = pfdBean.getBalance();
+
+        if (balance == 0.0) {
+            return;
+        }
 
         if (!config.getBoolean("enable")) {
             return;
@@ -118,6 +123,10 @@ public class PFDListener implements Listener {
             return;
         }
 
+        if (pfdBean.getBalance() == 0.0) {
+            return;
+        }
+
         noticePlayer(pfdBean);
 
         PFDBean.remove(pfdBean);
@@ -136,7 +145,7 @@ public class PFDListener implements Listener {
         String message = config.getString(pfdBean.getStatus() + "-message");
         if (message == null) {
             message = "";
-        } 
+        }
         message = message.replace("<player>", playerName)
                 .replace("<death-world>", deathWorld)
                 .replace("<respawn-world>", respawnWorld)
